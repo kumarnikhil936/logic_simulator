@@ -2,85 +2,48 @@
 #include<string>
 #include<list>
 #include<vector>
-using namespace std;
+#include "logicSimulator_1.h"
 
-typedef enum nodeType {INPUT, OUTPUT, NOT, AND, NAND, OR, NOR, XOR} nodeType; // Type of node
-typedef enum nodeState {low, high, unknown} nodeState; // State of node
+Wire::Wire(std::string labelValue, Node* driving_node, Node* driven_node) {
+    label        = labelValue;
+    drivingNode  = driving_node;
+    drivenNode   = driven_node;
+}
 
-class Wire; // Forward Declaration of Class Wire
+void Wire::printWireInfo() {
+    std::cout<<"The wire label is : " << label << endl;
+    std::cout<<"The driving node is : "<< drivingNode->name << endl;
+    std::cout<<"The driven node is : "<< drivenNode->name << endl << endl;
+}
 
-class Node {
-public:
-    std::string name;
-    nodeType type;
-    std::list <Wire*> inputWiresList; // list containing the references to wires which are input to this node
-    /*std::list<Wire*>::iterator itInputWires = outputWires.begin();*/
-    std::list <Wire*> outputWiresList; // list containing the references to wires which are output to this node
-    /*std::list<Wire*>::iterator itOutputWires = outputWires.begin();*/
-    nodeState state;
-    
-    void printNodeInfo() {
-        std::cout<<"The name of the instance is " << name << endl;
-        std::cout<<"The state of the instance is " << state << endl;
-        std::cout<<"The node is of type: " << type << endl << endl;
-    }
-    
-    void addInputWire (Wire* inputWireInstance) {
-        inputWiresList.push_back(inputWireInstance);
-    }
-    
-    void addOutputWire (Wire* outputWireInstance) {
-        outputWiresList.push_back(outputWireInstance);
-    }
-    
-    void showInputWires ();
+Node::Node(std::string nameValue, nodeType typeValue, nodeState stateValue) {
+    name=nameValue;
+    type=typeValue;
+    state=stateValue;
+}
 
-    void showOutputWires ();
-    
-    void evaluate ();
-    
-    Node(std::string nameValue, nodeType typeValue, nodeState stateValue) {
-        name=nameValue;
-        type=typeValue;
-        state=stateValue;
-    }
-    // ~Node();
-    
-};
+void Node::printNodeInfo() {
+    std::cout<<"The name of the instance is " << name << endl;
+    std::cout<<"The state of the instance is " << state << endl;
+    std::cout<<"The node is of type: " << type << endl << endl;
+}
 
-class Wire {
-public:
-    std::string label;
-    Node* drivingNode;
-    Node* drivenNode;
-    
-    void printWireInfo() {
-        std::cout<<"The wire label is : " << label << endl;
-        std::cout<<"The driving node is : "<< drivingNode->name << endl;
-        std::cout<<"The driven node is : "<< drivenNode->name << endl << endl;
-    }
-    
-    Wire(std::string labelValue, Node* driving_node, Node* driven_node) {
-        label        = labelValue;
-        drivingNode  = driving_node;
-        drivenNode   = driven_node;
-    }
-    
-    ~Wire() {}
-};
+void Node::addInputWire (Wire* inputWireInstance) {
+    inputWiresList.push_back(inputWireInstance);
+}
+
+void Node::addOutputWire (Wire* outputWireInstance) {
+    outputWiresList.push_back(outputWireInstance);
+}
 
 void Node::showInputWires() {
     for (auto i : inputWiresList)
         std::cout<< i->label <<" : is an input wire from the node : " << name << endl;
-    /*for (list<int>::iterator i = inputWiresList.begin(); i != lst.end(); ++i)
-     cout << *i << endl;*/
 }
 
 void Node::showOutputWires() {
     for (auto o : outputWiresList)
         std::cout<< o->label <<" : is an output wire to the node : " << name << endl;
-    /*for (list<int>::iterator i = outputWiresList.begin(); i != lst.end(); ++i)
-     cout << *i << endl;*/
 }
 
 void Node::evaluate(){
@@ -145,20 +108,6 @@ void Node::evaluate(){
     }
 }
 
-class Netlist {
-public:
-    std::vector<Node*> pointerToNodes;
-
-    int addNodes(Node* node);
-    
-    int showAllInputNodes();
-    
-    int showAllOutputNodes();
-    
-    int searchNode(string nameOfTheNode);
-    
-};
-
 int Netlist::addNodes(Node* node) {
     pointerToNodes.push_back(node);
     std::cout << "Added to the netlist node : " << node->name << endl;
@@ -209,6 +158,7 @@ int Netlist::searchNode(string nameOfTheNode) {
     return 0;
 }
 
+
 int main ()
 {
     Netlist circuit1;
@@ -255,28 +205,28 @@ int main ()
     
     std::cout << "Before Simulation: \n";
     /*a.printNodeInfo();
-    b.printNodeInfo();
-    cin.printNodeInfo();
-    d.printNodeInfo();
-    e.printNodeInfo();
-    f.printNodeInfo();
-    g.printNodeInfo();
-    h.printNodeInfo();
-    s.printNodeInfo();
-    cout.printNodeInfo();*/
+     b.printNodeInfo();
+     cin.printNodeInfo();
+     d.printNodeInfo();
+     e.printNodeInfo();
+     f.printNodeInfo();
+     g.printNodeInfo();
+     h.printNodeInfo();
+     s.printNodeInfo();
+     cout.printNodeInfo();*/
     
     /*w1.printWireInfo();
-    w2.printWireInfo();
-    w3.printWireInfo();
-    w4.printWireInfo();
-    w5.printWireInfo();
-    w6.printWireInfo();
-    w7.printWireInfo();
-    w8.printWireInfo();
-    w9.printWireInfo();
-    w10.printWireInfo();
-    w11.printWireInfo();
-    w12.printWireInfo();*/
+     w2.printWireInfo();
+     w3.printWireInfo();
+     w4.printWireInfo();
+     w5.printWireInfo();
+     w6.printWireInfo();
+     w7.printWireInfo();
+     w8.printWireInfo();
+     w9.printWireInfo();
+     w10.printWireInfo();
+     w11.printWireInfo();
+     w12.printWireInfo();*/
     
     a.addOutputWire(&w1);
     a.addOutputWire(&w7);
@@ -338,4 +288,5 @@ int main ()
     
     return 0;
 }
+
 
