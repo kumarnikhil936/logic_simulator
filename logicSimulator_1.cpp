@@ -13,9 +13,7 @@ public:
     std::string name;
     nodeType type;
     std::list <Wire*> inputWiresList; // list containing the references to wires which are input to this node
-    /*std::list<Wire*>::iterator itInputWires = outputWires.begin();*/
     std::list <Wire*> outputWiresList; // list containing the references to wires which are output to this node
-    /*std::list<Wire*>::iterator itOutputWires = outputWires.begin();*/
     nodeState state;
     
     void printNodeInfo() {
