@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include<list>
+#include<vector>
 using namespace std;
 
 typedef enum nodeType {INPUT, OUTPUT, NOT, AND, NAND, OR, NOR, XOR} nodeType; // Type of node
@@ -13,7 +14,9 @@ public:
     std::string name;
     nodeType type;
     std::list <Wire*> inputWiresList; // list containing the references to wires which are input to this node
+    /*std::list<Wire*>::iterator itInputWires = outputWires.begin();*/
     std::list <Wire*> outputWiresList; // list containing the references to wires which are output to this node
+    /*std::list<Wire*>::iterator itOutputWires = outputWires.begin();*/
     nodeState state;
     
     void printNodeInfo() {
@@ -142,8 +145,74 @@ void Node::evaluate(){
     }
 }
 
+class Netlist {
+public:
+    std::vector<Node*> pointerToNodes;
+
+    int addNodes(Node* node);
+    
+    int showAllInputNodes();
+    
+    int showAllOutputNodes();
+    
+    int searchNode(string nameOfTheNode);
+    
+};
+
+int Netlist::addNodes(Node* node) {
+    pointerToNodes.push_back(node);
+    std::cout << "Added to the netlist node : " << node->name << endl;
+    return 0;
+}
+
+int Netlist::showAllInputNodes(){
+    size_t vectorSize = pointerToNodes.size();
+    size_t numInputNodes = 0;
+    std::cout << "\nDisplaying the list of Input nodes in the circuit\n";
+    for (int i = 0; i < vectorSize; i++) {
+        if (pointerToNodes[i]->type == INPUT) {
+            cout << pointerToNodes[i]->name << endl;
+            numInputNodes++;
+        }
+    }
+    std::cout << "The number of Input nodes in total are : " << numInputNodes << "\n\n";
+    return 0;
+}
+
+int Netlist::showAllOutputNodes(){
+    size_t vectorSize = pointerToNodes.size();
+    size_t numOutputNodes = 0;
+    std::cout << "\nDisplaying the list of Output nodes in the circuit\n";
+    for (int i = 0; i < vectorSize; i++) {
+        if (pointerToNodes[i]->type == OUTPUT) {
+            cout << pointerToNodes[i]->name << endl;
+            numOutputNodes++;
+        }
+    }
+    std::cout << "The number of Output nodes in total are : " << numOutputNodes << "\n\n";
+    return 0;
+}
+
+int Netlist::searchNode(string nameOfTheNode) {
+    size_t vectorSize = pointerToNodes.size();
+    bool found = 0;
+    std::cout << "Looking for node - " << nameOfTheNode << " in the circuit netlist \n";
+    for (int i = 0; i < vectorSize; i++) {
+        if (pointerToNodes[i]->name == nameOfTheNode)
+            found = 1;
+    }
+    if (found)
+        std::cout << "Found the node - " << nameOfTheNode << " \n\n";
+    else
+        std::cout << "Could not find the node - " << nameOfTheNode << " \n\n";
+    
+    return 0;
+}
+
 int main ()
 {
+    Netlist circuit1;
+    
     Node a("a", INPUT, high);
     Node b("b", INPUT, low);
     Node cin("cin", INPUT, low);
@@ -154,7 +223,23 @@ int main ()
     Node h("h", OR, low);
     Node s("s", OUTPUT, low);
     Node cout("cout", OUTPUT, low);
-
+    
+    circuit1.addNodes(&a);
+    circuit1.addNodes(&b);
+    circuit1.addNodes(&cin);
+    circuit1.addNodes(&d);
+    circuit1.addNodes(&e);
+    circuit1.addNodes(&f);
+    circuit1.addNodes(&g);
+    circuit1.addNodes(&h);
+    circuit1.addNodes(&s);
+    circuit1.addNodes(&cout);
+    
+    circuit1.showAllInputNodes();
+    circuit1.showAllOutputNodes();
+    
+    circuit1.searchNode("cout");
+    
     Wire w1("w1", &a, &d);
     Wire w2("w2", &b, &d);
     Wire w3("w3", &d, &e);
