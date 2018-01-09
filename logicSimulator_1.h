@@ -59,6 +59,8 @@ public:
     
     int showAllOutputNodes();
     
+    int showAllNodes();
+    
     int searchNode(string nameOfTheNode);
   
     ~Netlist() {}

@@ -2,6 +2,9 @@
 #include<string>
 #include<list>
 #include<vector>
+#include<fstream>
+#include<regex>
+#include <boost/tokenizer.hpp>
 #include "logicSimulator_1.h"
 
 Wire::Wire(std::string labelValue, Node* driving_node, Node* driven_node) {
@@ -110,7 +113,7 @@ void Node::evaluate(){
 
 int Netlist::addNodes(Node* node) {
     pointerToNodes.push_back(node);
-    std::cout << "Added to the netlist node : " << node->name << endl;
+    std::cout << "Added to the netlist node : " << node->name << std::endl;
     return 0;
 }
 
@@ -124,7 +127,7 @@ int Netlist::showAllInputNodes(){
             numInputNodes++;
         }
     }
-    std::cout << "The number of Input nodes in total are : " << numInputNodes << "\n\n";
+    std::cout << "The total number of Input nodes are : " << numInputNodes << "\n\n";
     return 0;
 }
 
@@ -138,7 +141,16 @@ int Netlist::showAllOutputNodes(){
             numOutputNodes++;
         }
     }
-    std::cout << "The number of Output nodes in total are : " << numOutputNodes << "\n\n";
+    std::cout << "The total number of Output nodes are : " << numOutputNodes << "\n\n";
+    return 0;
+}
+
+int Netlist::showAllNodes(){
+    size_t vectorSize = pointerToNodes.size();
+    std::cout << "\nDisplaying all the nodes in the circuit\n";
+    for (int i = 0; i < vectorSize; i++) {
+        cout << "Node " << pointerToNodes[i]->name << " of type " << pointerToNodes[i]->type << std::endl;
+    }
     return 0;
 }
 
@@ -158,10 +170,14 @@ int Netlist::searchNode(string nameOfTheNode) {
     return 0;
 }
 
+bool is_number(const std::string& s)
+{
+    return( strspn( s.c_str(), "-.0123456789" ) == s.size() );
+}
 
 int main ()
 {
-    Netlist circuit1;
+    /*Netlist circuit1;
     
     Node a("a", INPUT, high);
     Node b("b", INPUT, low);
@@ -203,7 +219,7 @@ int main ()
     Wire w11("w11", &g, &h);
     Wire w12("w12", &h, &cout);
     
-    std::cout << "Before Simulation: \n";
+    std::cout << "Before Simulation: \n";*/
     /*a.printNodeInfo();
      b.printNodeInfo();
      cin.printNodeInfo();
@@ -228,7 +244,7 @@ int main ()
      w11.printWireInfo();
      w12.printWireInfo();*/
     
-    a.addOutputWire(&w1);
+    /*a.addOutputWire(&w1);
     a.addOutputWire(&w7);
     
     b.addOutputWire(&w2);
@@ -285,6 +301,153 @@ int main ()
     h.printNodeInfo();
     s.printNodeInfo();
     cout.printNodeInfo();
+    */
+    
+    Netlist c17_bench;
+
+    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+    boost::char_separator<char> sep("() =,");
+
+    ifstream inFile ("/Users/nikhilkumarjha/Google Drive/UPB Study Material/Matthias Project/c17.bench");
+    if (!inFile) cerr << "Can't open input file!";
+
+    char oneline[256];
+    std::vector<std::string> lines;
+    
+    std::vector<Node> nodeObjects;
+    std::vector<string> wireNames;
+
+    
+    while (inFile)
+    {
+        inFile.getline(oneline, 256);
+        if(inFile.good())    // If a line was successfully read
+        {
+            if(strlen(oneline) == 0)  // Skip any blank lines
+                continue;
+            else if(oneline[0] == '#')  // Skip any comment lines
+                continue;
+            //else done = true;    // Got a valid data line so return with this line
+        }
+        else // No valid line read, meaning we reached the end of file
+        {
+            strcpy(oneline, ""); // Copy empty string into line as sentinal value
+        }
+        //std::cout << oneline << endl;
+        lines.push_back(oneline);
+    } // Read the complete file and push every line in a vector "lines"
+    
+    
+    // Read every line from the vector and tokenize it
+    for (std::vector<string>::iterator itr = lines.begin() ; itr != lines.end(); ++itr) {
+        //std::cout << ' ' << *itr << std::endl;
+        
+        string str;
+        string nodetype;
+        string wirename;
+        int i = 0;
+
+        str = *itr;
+
+        tokenizer tokens(str, sep);
+        
+        Node * a[100];
+        
+        for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
+            //std::cout << "<" << *tok_iter << "> \n";
+            i++;
+            
+            if (is_number(*tok_iter)) {
+                wirename = *tok_iter;
+                wireNames.push_back(wirename);
+            }
+            else if (*tok_iter == "INPUT" | *tok_iter == "OUTPUT" )
+            {
+                nodetype = *tok_iter;
+                continue;
+            }
+            else if ( *tok_iter == "AND" | *tok_iter == "NAND" | *tok_iter == "NOT" | *tok_iter == "NOR" |*tok_iter == "OR" | *tok_iter == "XOR"  ) {
+                nodetype = *tok_iter;
+            }
+            
+            //std::regex inputNode ("(INPUT)(.*)");
+            //if (std::regex_match (nodetype,inputNode)) {
+            
+            if (nodetype == "INPUT") {
+                a[i] = new Node(*tok_iter, INPUT, high);
+                std::cout << "Created a node " << *tok_iter << " of type INPUT. \n";
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "OUTPUT") {
+                a[i] = new Node(*tok_iter, OUTPUT, high);
+                std::cout << "Created a node " << *tok_iter << " of type OUTPUT. \n" ;
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "NAND") {
+                a[i] = new Node(wirename, NAND, high);
+                std::cout << "Created a node " << wirename << " of type NAND. \n";
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "NOR") {
+                a[i] = new Node(wirename, NOR, high);
+                std::cout << "Created a node " << wirename << " of type NOR. \n" ;
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            else if (nodetype == "OR") {
+                a[i] = new Node(wirename, OR, high);
+                std::cout << "Created a node " << wirename << " of type OR. \n" ;
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "NOT") {
+                a[i] = new Node(wirename, NOT, high);
+                std::cout << "Created a node " << wirename << " of type NOT. \n";
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "AND") {
+                a[i] = new Node(wirename, AND, high);
+                std::cout << "Created a node " << wirename << " of type AND. \n" ;
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+            else if (nodetype == "XOR") {
+                a[i] = new Node(wirename, XOR, high);
+                std::cout << "Created a node " << wirename << " of type XOR. \n" ;
+                c17_bench.addNodes(a[i]);
+                nodetype = "NULL";
+            }
+            
+          
+            std::cout << "\n";
+            
+        }
+    }
+
+    //c17_bench.searchNode("7");
+    
+    c17_bench.showAllNodes();
+    
+    // c17_bench.showAllInputNodes();
+    // c17_bench.showAllOutputNodes();
+    
+    /*size_t wireNameVectorSize = wireNames.size();
+    std::cout << "\nDisplaying the list of wires in the circuit\n";
+    for (int i = 0; i < wireNameVectorSize; i++) {
+        cout << wireNames[i] << std::endl;
+        }
+    */
+    inFile.close();
     
     return 0;
 }
